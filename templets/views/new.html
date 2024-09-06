@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Blood Donors</title>
+    <style>
+        .donor-list {
+            margin-top: 20px;
+        }
+        .donor-item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Find Blood Donors</h1>
+
+    <!-- Form to Search Donors -->
+    <form id="searchForm">
+        <label for="bloodGroup">Blood Group:</label>
+        <input type="text" id="bloodGroup" name="bloodGroup" placeholder="A+, B+, O-, etc.">
+        <label for="state">State:</label>
+        <input type="text" id="state" name="state" placeholder="Enter state">
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city" placeholder="Enter city">
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- Display the results -->
+    <div class="donor-list" id="donorList"></div>
+
+    <script>
+        // Form submit event listener
+        document.getElementById('searchForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent form submission
+
+            // Get form values
+            const bloodGroup = document.getElementById('bloodGroup').value;
+            const state = document.getElementById('state').value;
+            const city = document.getElementById('city').value;
+
+            // Build the query parameters for the GET request
+            const query = new URLSearchParams({
+                BG: bloodGroup,
+                state: state,
+                city: city
+            }).toString();
+
+            // Send GET request to the server
+            try {
+                const response = await fetch(`/findblood?${query}`);
+                const donors = await response.json();
+
+                // Clear previous results
+                const donorList = document.getElementById('donorList');
+                donorList.innerHTML = '';
+
+                // Display each donor
+                if (donors.length > 0) {
+                    donors.forEach(donor => {
+                        const donorItem = document.createElement('div');
+                        donorItem.classList.add('donor-item');
+                        donorItem.textContent = `Name: ${donor.name}, Blood Group: ${donor.BG}, State: ${donor.state}, City: ${donor.city}`;
+                        donorList.appendChild(donorItem);
+                    });
+                } else {
+                    donorList.textContent = 'No donors found.';
+                }
+            } catch (error) {
+                console.error('Error fetching donors:', error);
+                alert('An error occurred while fetching donors.');
+            }
+        });
+    </script>
+</body>
+</html>
